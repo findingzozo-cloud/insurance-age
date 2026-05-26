@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>保險年齡換算試算表</title>
+<style>
+  :root {
+    --bg: #f7f6f2;
+    --surface: #ffffff;
+    --surface-2: #f1efe8;
+    --border: rgba(0,0,0,0.12);
+    --border-strong: rgba(0,0,0,0.25);
+    --text-primary: #2c2c2a;
+    --text-secondary: #5f5e5a;
+    --text-tertiary: #888780;
+    --accent: #185FA5;
+    --accent-bg: #E6F1FB;
+    --highlight: #993C1D;
+    --highlight-bg: #FAECE7;
+    --success: #0F6E56;
+    --success-bg: #E1F5EE;
+    --input-bg: #FFFCE6;
+    --input-border: #EF9F27;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px 16px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+  }
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-size: 22px;
+    font-weight: 500;
+    margin: 0 0 6px;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 22px;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin: 0 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .input-row:last-child { margin-bottom: 0; }
+  .input-row label {
+    flex: 0 0 110px;
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+  .input-row input[type="date"] {
+    flex: 1;
+    padding: 8px 12px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--accent);
+    font-weight: 500;
+    min-width: 0;
+  }
+  .roc-note {
+    font-size: 12px;
+    color: var(--highlight);
+    background: #FFF2CC;
+    padding: 4px 10px;
+    border-radius: var(--radius-md);
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+  .input-row input[type="date"]:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-bg);
+  }
+  .reset-btn {
+    background: transparent;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    padding: 6px 10px;
+    font-size: 12px;
+    font-family: inherit;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .reset-btn:hover { background: var(--surface-2); }
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .result-item {
+    background: var(--surface-2);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+  }
+  .result-item .label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0 0 4px;
+  }
+  .result-item .value {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0;
+  }
+  .result-item.featured {
+    background: var(--highlight-bg);
+    grid-column: span 2;
+    padding: 16px 18px;
+  }
+  .result-item.featured .label {
+    color: var(--highlight);
+    font-weight: 500;
+  }
+  .result-item.featured .value {
+    font-size: 28px;
+    color: var(--highlight);
+  }
+  .result-item.countdown {
+    background: var(--success-bg);
+    grid-column: span 2;
+  }
+  .result-item.countdown .label { color: var(--success); }
+  .result-item.countdown .value { color: var(--success); }
+  .result-item .hint {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin: 4px 0 0;
+  }
+  .notes {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 22px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .notes h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0 0 10px;
+  }
+  .notes ol {
+    margin: 0;
+    padding-left: 20px;
+  }
+  .notes li {
+    margin-bottom: 6px;
+    line-height: 1.7;
+  }
+  .notes li:last-child { margin-bottom: 0; }
+  .error {
+    color: #A32D2D;
+    font-size: 13px;
+    margin-top: 8px;
+    display: none;
+  }
+  .error.show { display: block; }
+  @media (max-width: 480px) {
+    .input-row label { flex-basis: 70px; font-size: 13px; }
+    .input-row { flex-wrap: wrap; }
+    .roc-note { font-size: 11px; margin-left: 70px; }
+    .result-item .value { font-size: 18px; }
+    .result-item.featured .value { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>保險年齡換算試算表</h1>
+  <p class="subtitle">台灣保險業常用：滿 6 個月進位法</p>
+</header>
+
+<div class="card">
+  <p class="section-title">輸入</p>
+  <div class="input-row">
+    <label for="birth">出生日期</label>
+    <input type="date" id="birth" value="1990-01-15">
+    <span class="roc-note" id="birthRoc">—</span>
+  </div>
+  <div class="input-row">
+    <label for="basis">計算基準日</label>
+    <input type="date" id="basis">
+    <span class="roc-note" id="basisRoc">—</span>
+    <button class="reset-btn" id="resetBasis">設為今天</button>
+  </div>
+  <p class="error" id="error"></p>
+</div>
+
+<div class="card">
+  <p class="section-title">計算結果</p>
+  <div class="result-grid">
+    <div class="result-item">
+      <p class="label">足歲（實際年齡）</p>
+      <p class="value"><span id="actualAge">—</span> 歲</p>
+    </div>
+    <div class="result-item">
+      <p class="label">超過上次生日</p>
+      <p class="value"><span id="extraMonths">—</span> 個月</p>
+    </div>
+    <div class="result-item featured">
+      <p class="label">★ 保險年齡（投保時採用）</p>
+      <p class="value"><span id="insuranceAge">—</span> 歲</p>
+    </div>
+    <div class="result-item countdown">
+      <p class="label">距下次年齡進位</p>
+      <p class="value">還剩 <span id="daysToNext">—</span> 天</p>
+      <p class="hint">下次進位日：<span id="nextDate">—</span>，此日後保險年齡 +1</p>
+    </div>
+  </div>
+</div>
+
+<div class="notes">
+  <h3>計算規則說明</h3>
+  <ol>
+    <li>保險年齡採「滿 6 個月進位法」：足歲超過 6 個月，年齡加 1。</li>
+    <li>每人每年有兩個進位日 —— 生日當天、生日 + 6 個月當天。</li>
+    <li>保費依保險年齡計算，年齡越高保費越貴；接近進位日前投保可省保費。</li>
+    <li>計算基準日預設為今天，可改為保單預計生效日。</li>
+  </ol>
+</div>
+
+</div>
+
+<script>
+  const $birth = document.getElementById('birth');
+  const $basis = document.getElementById('basis');
+  const $resetBtn = document.getElementById('resetBasis');
+  const $error = document.getElementById('error');
+  const $birthRoc = document.getElementById('birthRoc');
+  const $basisRoc = document.getElementById('basisRoc');
+
+  const $actualAge = document.getElementById('actualAge');
+  const $extraMonths = document.getElementById('extraMonths');
+  const $insuranceAge = document.getElementById('insuranceAge');
+  const $daysToNext = document.getElementById('daysToNext');
+  const $nextDate = document.getElementById('nextDate');
+
+  function todayISO() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function parseDate(str) {
+    if (!str) return null;
+    const [y, m, d] = str.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  function formatDate(d) {
+    if (!d) return '—';
+    return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+  }
+
+  function formatROC(d) {
+    if (!d) return '—';
+    const rocYear = d.getFullYear() - 1911;
+    if (rocYear <= 0) return '民國前';
+    return `民國 ${rocYear} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`;
+  }
+
+  // 計算兩日期之間的「完整年數」和「剩餘月數」
+  function yearsAndMonthsBetween(birth, basis) {
+    let years = basis.getFullYear() - birth.getFullYear();
+    let months = basis.getMonth() - birth.getMonth();
+    let days = basis.getDate() - birth.getDate();
+
+    if (days < 0) months -= 1;
+    if (months < 0) {
+      years -= 1;
+      months += 12;
+    }
+    return { years, months };
+  }
+
+  // 找出下一個年齡進位日（生日當天 或 生日+6個月當天，取在基準日之後最近的）
+  function nextMilestone(birth, basis) {
+    const candidates = [];
+    const year = basis.getFullYear();
+    const bm = birth.getMonth();
+    const bd = birth.getDate();
+
+    // 今年生日
+    candidates.push(new Date(year, bm, bd));
+    // 今年生日 + 6 個月
+    const halfThis = new Date(year, bm + 6, bd);
+    candidates.push(halfThis);
+    // 明年生日（保底）
+    candidates.push(new Date(year + 1, bm, bd));
+    // 明年生日 + 6 個月（保底）
+    candidates.push(new Date(year + 1, bm + 6, bd));
+
+    const future = candidates
+      .filter(d => d > basis)
+      .sort((a, b) => a - b);
+
+    return future[0];
+  }
+
+  function daysBetween(a, b) {
+    const ms = b - a;
+    return Math.ceil(ms / (1000 * 60 * 60 * 24));
+  }
+
+  function calculate() {
+    $error.classList.remove('show');
+    const birth = parseDate($birth.value);
+    const basis = parseDate($basis.value);
+
+    $birthRoc.textContent = formatROC(birth);
+    $basisRoc.textContent = formatROC(basis);
+
+    if (!birth || !basis) {
+      $error.textContent = '請選擇有效的日期';
+      $error.classList.add('show');
+      return;
+    }
+    if (birth > basis) {
+      $error.textContent = '出生日期不能晚於計算基準日';
+      $error.classList.add('show');
+      ['actualAge','extraMonths','insuranceAge','daysToNext','nextDate'].forEach(id => {
+        document.getElementById(id).textContent = '—';
+      });
+      return;
+    }
+
+    const { years, months } = yearsAndMonthsBetween(birth, basis);
+    const insuranceAge = years + (months >= 6 ? 1 : 0);
+    const next = nextMilestone(birth, basis);
+    const days = daysBetween(basis, next);
+
+    $actualAge.textContent = years;
+    $extraMonths.textContent = months;
+    $insuranceAge.textContent = insuranceAge;
+    $daysToNext.textContent = days;
+    $nextDate.textContent = formatDate(next);
+  }
+
+  $birth.addEventListener('change', calculate);
+  $basis.addEventListener('change', calculate);
+  $resetBtn.addEventListener('click', () => {
+    $basis.value = todayISO();
+    calculate();
+  });
+
+  // 初始化
+  $basis.value = todayISO();
+  calculate();
+</script>
+
+</body>
+</html>
